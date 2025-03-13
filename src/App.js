@@ -7,15 +7,23 @@ import { io } from "socket.io-client";
 import Header from "./components/Header";
 import chatBg from "./assets/chatbg.jpg";
 
-
 function App() {
   const [socket, setSocket] = useState(null);
   const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    setSocket(io("https://backend-nu7m.onrender.com"));
+    // Connect to the deployed backend WebSocket server
+    const newSocket = io("https://chatapp-server-1-kzbo.onrender.com", {
+      transports: ["websocket"], // Force WebSocket for stability
+    });
+    setSocket(newSocket);
+
+    // Retrieve stored userId from cookies
     const _userId = Cookies.getItem("userId");
     if (_userId) setUserId(_userId);
+
+    // Cleanup on unmount
+    return () => newSocket.close();
   }, []);
 
   return (
@@ -26,7 +34,7 @@ function App() {
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        backgroundImage: `url(${chatBg})`,  // Chat-related background
+        backgroundImage: `url(${chatBg})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundAttachment: "fixed",
